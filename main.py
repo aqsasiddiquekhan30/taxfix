@@ -1,39 +1,12 @@
-import json
 import pandas as pd
-from DataFetcherModule import DataFetcher
-from RetryModule import RetryPolicy
-from QualityModule import DataQualityChecker
-from DataAnonymizerModule import DataAnonymizer
-from AuthModule import KeyAuthenticator
-from QueryModule import QueryDatabase
-
-def load_params(file_path):
-    """Load parameters from a JSON file."""
-    try:
-        with open(file_path, 'r') as file:
-            return json.load(file)
-    except (IOError, json.JSONDecodeError) as e:
-        print(f"Error loading parameters: {e}")
-        return {}
-
-def standardize_data(data):
-    """Standardize and flatten nested address fields in the data."""
-    standardized_data = []
-    for record in data:
-        if 'address' in record and isinstance(record['address'], dict):
-            address = record.pop('address')
-            record.update({
-                'street': address.get('street', ''),
-                'streetName': address.get('streetName', ''),
-                'buildingNumber': address.get('buildingNumber', ''),
-                'city': address.get('city', ''),
-                'zipcode': address.get('zipcode', ''),
-                'country': address.get('country', ''),
-                'latitude': address.get('latitude', ''),
-                'longitude': address.get('longitude', '')
-            })
-        standardized_data.append(record)
-    return standardized_data
+from modules.DataFetcherModule import DataFetcher
+from modules.RetryModule import RetryPolicy
+from modules.QualityModule import DataQualityChecker
+from modules.DataAnonymizerModule import DataAnonymizer
+from modules.AuthModule import KeyAuthenticator
+from db.query import QueryDatabase
+from pathlib import Path
+from utils.helper import load_params, standardize_data
 
 def main():
     # Load parameters and authentication details
@@ -47,31 +20,6 @@ def main():
     max_records = params.get('max_records')
     chunk_size = params.get('chunk_size')
 
-    # SQL queries for table creation
-    create_table_query = '''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        firstname TEXT NOT NULL,
-        lastname TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT,
-        birthday DATE,
-        gender TEXT CHECK(gender IN ('male', 'female')),
-        street TEXT,
-        streetName TEXT,
-        buildingNumber TEXT,
-        city TEXT,
-        zipcode TEXT,
-        country TEXT,
-        latitude REAL,
-        longitude REAL,
-        email_encrypted TEXT
-    );
-    '''
-    create_index = '''
-    CREATE INDEX IF NOT EXISTS idx_email_encrypt ON users (email_encrypted);
-    '''
-
     if not api_url:
         raise ValueError("API URL is missing in params.json")
 
@@ -81,11 +29,11 @@ def main():
         '_gender': gender,
         '_birthday_start': birthday_start
     }
-    data_fetcher = DataFetcher(api_url, fetch_params)
+    DataFetcher(api_url, fetch_params)
 
     # Initialize SQLite table creator
-    db_path = r'C:\Users\Aqsa khan\taxfixUsers.db'
-    table_creator = QueryDatabase(db_path)
+    db_path = Path.home() / 'test_tax.db' 
+    db_query = QueryDatabase(db_path)
 
     # Fetch data with retries
     data = []
@@ -134,10 +82,9 @@ def main():
         if authenticator.authenticate_admin(auth_params.get('admin_key')):
             if authenticator.authenticate_database(auth_params.get('database_key')):
                 # Check if the table exists, if not, create it
-                if not table_creator.table_exists('users'):
-                    table_creator.create_table_from_query(create_table_query)
-                    table_creator.create_table_from_query(create_index)
-                table_creator.insert_data('users', clean_data)
+                if not db_query.table_exists('users'):
+                    db_query.create_database_table()
+                db_query.insert_data('users', clean_data)
                 print(clean_data)
         else:
             print("Authentication failed.")
