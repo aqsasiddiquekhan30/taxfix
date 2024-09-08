@@ -32,7 +32,7 @@ def main():
     DataFetcher(api_url, fetch_params)
 
     # Initialize SQLite table creator
-    db_path = Path.home() / 'test_tax.db' 
+    db_path = Path.home() / 'taxfixUsers.db' 
     db_query = QueryDatabase(db_path)
 
     # Fetch data with retries
