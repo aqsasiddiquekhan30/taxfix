@@ -1,0 +1,8 @@
+{
+    "url": "https://fakerapi.it/api/v1/persons",
+    "gender": "male",
+    "birthday_start": "1900-01-01",
+    "max_records": 10000,
+    "chunk_size": 1000
+  }
+  
