@@ -14,7 +14,7 @@ Modules and Classes: The script uses several custom modules and classes, includi
 3. DataQualityChecker to validate the quality of the fetched data QualityModule.py.
 4. DataAnonymizer to anonymize sensitive information before storing it in a database DataAnonymizerModule.py.
 5. KeyAuthenticator for authenticating access using keys stored in JSON files KeyAuthenticatorModule.py.
-6. QueryDatabase for managing database operations like table creation, checking for existing tables, and inserting data QueryDatabaseModule.py.
+6. QueryDatabase for managing database operations like table creation, checking for existing tables, and inserting data query.py. 
 Parameter Loading:
 The script begins by loading parameters and authentication details from JSON files (params.json and auth_params.json).
 These parameters include the API URL, filtering criteria (like gender and birthday range), and details for data fetching such as maximum records and chunk size.
@@ -31,6 +31,9 @@ Data Quality and Anonymization:
 A DataQualityChecker instance validates the data against required fields (e.g., checking for the presence of an 'email').
 The DataAnonymizer class is used to anonymize sensitive fields to protect privacy before saving the data. The annonymiztaion rules are followed as mentioned in the document.
 
+DataAnonymizer_Test.py also executes unit tests for email encryption and masking functions.
+
+
 Database Operations:
 
 The script initializes a QueryDatabase instance connected to an SQLite database located at the specified path.
@@ -39,6 +42,7 @@ Finally, the cleaned and anonymized data is inserted into the database.
 Authentication:
 
 Authentication is managed by the KeyAuthenticator class, which verifies that the correct keys (admin and database keys) are provided before allowing any database operations.
+
 
 Key Challenges & Solutions:
 1. The API did not support fetching more than 1000 records in one call, so that loop is implemented that checks the unique emails and keeps fetching till the max data size
