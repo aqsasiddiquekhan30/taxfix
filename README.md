@@ -56,6 +56,12 @@ Future Extensions:
 2. The Quality class shouold be extended and further checks should be added. We can extend it to add primary and secondary checks.
 3. The Retry class can also have the retries for databasse connection and whole ETL failure retry.
 
+Running the Code: 
+
+To run the code, you will need the keys.json and auth_keys.json files, which contain the database password and encrypted values, respectively.
+
+Please note that these files are not included in the repository to prevent unauthorized access to the database. If you require these files, please contact me via email, and I will provide them to you.
+
 Objective # 2:
 
 Data Summary and Presentation
